@@ -1,7 +1,6 @@
 package ru.netology.web.test;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.data.DataHelper;
 import ru.netology.page.LoginPage;
@@ -10,8 +9,8 @@ import static com.codeborne.selenide.Selenide.open;
 
 class LoginTest {
 
-    @AfterEach
-    void shouldClearData() {
+    @AfterAll
+    static void shouldClearData() {
         DataHelper.dropTables();
     }
 
@@ -49,19 +48,20 @@ class LoginTest {
     }
 
     @Test
-    void shouldUnsuccessfulExceedingLimit() {
+    void shouldUnsuccessfulExceedingLimit() { // баг: не появляется warningMessageLoginExceedingLimit
 
         open("http://localhost:9999");
         var loginPage = new LoginPage();
-        var authInfo = DataHelper.getValidAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getInvalidVerificationCode(authInfo);
-        verificationPage.validVerify(verificationCode);
-        DataHelper.clearCodeField();
-        verificationPage.validVerify(verificationCode);
-        DataHelper.clearCodeField();
-        verificationPage.validVerify(verificationCode);
-        verificationPage.warningMessageLimit();
+        var authInfo = DataHelper.getInvalidAuthInfo();
+        loginPage.invalidLogin(authInfo);
+        loginPage.warningMessageLogin();
+        LoginPage.clearLoginFields();
+        loginPage.invalidLogin(authInfo);
+        loginPage.warningMessageLogin();
+        LoginPage.clearLoginFields();
+        loginPage.invalidLogin(authInfo);
+        loginPage.warningMessageLoginExceedingLimit();
     }
 }
+
 

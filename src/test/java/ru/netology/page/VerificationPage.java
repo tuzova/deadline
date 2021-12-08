@@ -1,6 +1,7 @@
 package ru.netology.page;
 
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.Keys;
 import ru.netology.data.DataHelper;
 
 import java.time.Duration;
@@ -22,16 +23,24 @@ public class VerificationPage {
         verifyButton.click();
     }
 
-    public void warningMessageInvalidCode() {
+    public void warningMessageInvalidCode() { // comment: доработать локаторы
         $(withText("Ошибка")).shouldBe(visible, Duration.ofSeconds(15));
         $("[data-test-id='error-notification'] div.notification__content").shouldBe(visible);
-        $(withText("Ошибка! Неверно указан код! Попробуйте ещё раз.")).shouldBe(visible);
+        $(withText("Неверно указан код! Попробуйте ещё раз.")).shouldBe(visible);
     }
 
-    public void warningMessageLimit() {
-        $(withText("Ошибка")).shouldBe(visible, Duration.ofSeconds(15));
-        $("[data-test-id='error-notification'] div.notification__content").shouldBe(visible);
-        $(withText("Ошибка! Превышено количество попыток ввода кода!")).shouldBe(visible);
-    }
+//    public void warningMessageLimit() {
+//        $(withText("Ошибка")).shouldBe(visible, Duration.ofSeconds(15));
+//        $("[data-test-id='error-notification'] div.notification__content").shouldBe(visible);
+//        $(withText("Ошибка! Превышено количество попыток ввода кода!")).shouldBe(visible);
+//    }
+
+//    // очистка поля ввода кода / comment: Это метод page объекта, размещайте его в классе page объекта
+//    public static void clearCodeField() {
+//        $("[data-test-id='code'] input").click();
+//        $("[data-test-id='code'] input").sendKeys(Keys.CONTROL + "A");
+//        $("[data-test-id='code'] input").sendKeys(Keys.BACK_SPACE);
+//    }
+
 }
 

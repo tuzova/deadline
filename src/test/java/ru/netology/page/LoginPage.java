@@ -1,6 +1,7 @@
 package ru.netology.page;
 
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.Keys;
 import ru.netology.data.DataHelper;
 
 import java.time.Duration;
@@ -27,9 +28,25 @@ public class LoginPage {
         loginButton.click();
     }
 
-    public void warningMessageLogin() {
+    public void warningMessageLogin() { // comment: доработать локаторы
         $(withText("Ошибка")).shouldBe(visible, Duration.ofSeconds(15));
         $("[data-test-id='error-notification'] div.notification__content").shouldBe(visible);
-        $(withText("Ошибка! Неверно указан логин или пароль")).shouldBe(visible);
+        $(withText("Неверно указан логин или пароль")).shouldBe(visible);
+    }
+
+    public void warningMessageLoginExceedingLimit() {
+        $(withText("Ошибка")).shouldBe(visible, Duration.ofSeconds(15));
+        $("[data-test-id='error-notification'] div.notification__content").shouldBe(visible);
+        $(withText("Превышено количество попыток ввода пароля!")).shouldBe(visible);
+    }
+
+    // очистка полей ввода логина и пароля / comment: Это метод page объекта, размещайте его в классе page объекта
+    public static void clearLoginFields() {
+        $("[data-test-id='login'] input").click();
+        $("[data-test-id='login'] input").sendKeys(Keys.CONTROL + "A");
+        $("[data-test-id='login'] input").sendKeys(Keys.BACK_SPACE);
+        $("[data-test-id='password'] input").click();
+        $("[data-test-id='password'] input").sendKeys(Keys.CONTROL + "A");
+        $("[data-test-id='password'] input").sendKeys(Keys.BACK_SPACE);
     }
 }

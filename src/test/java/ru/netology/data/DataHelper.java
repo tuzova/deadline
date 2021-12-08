@@ -4,12 +4,10 @@ import com.github.javafaker.Faker;
 import lombok.Value;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.openqa.selenium.Keys;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-
-import static com.codeborne.selenide.Selenide.$;
+import java.sql.SQLException;
 
 public class DataHelper {
     private DataHelper() {
@@ -17,13 +15,13 @@ public class DataHelper {
 
     @Value
     public static class AuthInfo {
-        private String login;
-        private String password;
+        String login;
+        String password;
     }
 
     // валидный пользователь
     public static AuthInfo getValidAuthInfo() {
-        return new AuthInfo("vasya", "qwerty123");
+        return new AuthInfo("vasya", "qwerty123"); // id 9abf2854-58df-4f11-9d63-8360ab526a85
     }
 
     // невалидный пользователь
@@ -34,13 +32,14 @@ public class DataHelper {
 
     @Value
     public static class VerificationCode {
-        private String code;
+        String code;
     }
 
     // валидный сгенерированный код из СУБД
     public static VerificationCode getValidVerificationCode(AuthInfo authInfo) {
         QueryRunner runner = new QueryRunner();
-        String authCode = "SELECT code FROM auth_codes";
+        // comment: выражение запроса для поиска последнего кода, можно использовать сортировку по полю created и оператор LIMIT
+        String authCode = "SELECT code FROM auth_codes ORDER BY created DESC LIMIT 1";
 
         try (
                 Connection connection = DriverManager.getConnection(
@@ -48,8 +47,10 @@ public class DataHelper {
                 );
         ) {
             authCode = runner.query(connection, authCode, new ScalarHandler<>());
-        } catch (java.sql.SQLException ignored) {
+        } catch (SQLException throwables) {
+            throwables.printStackTrace(); // comment: можно хотя бы в консоль ошибку вывести
         }
+
         return new VerificationCode(authCode);
     }
 
@@ -61,30 +62,24 @@ public class DataHelper {
     // очистка всех данных из таблиц
     public static void dropTables() {
         QueryRunner runner = new QueryRunner();
-        String Users = "DELETE FROM users;";
         String Cards = "DELETE FROM cards;";
         String CardTransactions = "DELETE FROM card_transactions;";
         String AuthCodes = "DELETE FROM auth_codes;";
+        String Users = "DELETE FROM users;"; // comment: таблица users может быть очищена только в последнюю очередь
 
         try (
                 Connection connection = DriverManager.getConnection(
                         "jdbc:mysql://localhost:3306/app", "app", "pass"
                 );
         ) {
-            runner.update(connection, Users);
             runner.update(connection, Cards);
             runner.update(connection, CardTransactions);
             runner.update(connection, AuthCodes);
+            runner.update(connection, Users); // comment: таблица users может быть очищена только в последнюю очередь
 
-        } catch (java.sql.SQLException ignored) {
+        } catch (SQLException throwables) {
+            throwables.printStackTrace(); // comment: можно хотя бы в консоль ошибку вывести
         }
-    }
-
-    // очистка поля ввода кода
-    public static void clearCodeField() {
-        $("[data-test-id='code'] input").click();
-        $("[data-test-id='code'] input").sendKeys(Keys.CONTROL + "A");
-        $("[data-test-id='code'] input").sendKeys(Keys.BACK_SPACE);
     }
 }
 
